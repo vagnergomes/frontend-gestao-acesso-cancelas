@@ -5,7 +5,7 @@ import axios from 'axios';
 
 // Definição do Axios antes das chamadas
 const api = axios.create({
-    baseURL: "http://10.1.10.61:5001",
+    baseURL: "http://10.1.3.70:5001",
 });
 
 // Adicione os interceptores ANTES de qualquer requisição
@@ -18,7 +18,6 @@ api.interceptors.request.use(
         return config;
     },
     async (error) => {
-        console.log("Erro no request interceptor", error);
         return Promise.reject(error);
     }
 );
@@ -37,10 +36,10 @@ api.interceptors.response.use(
                     error.config.headers.Authorization = `Bearer ${result.data.token}`;
                     return api.request(updatedConfig);
                 } catch (refreshError) {
-                    console.error("Falha ao renovar token:", refreshError);
+                   return Promise.reject("Erro ao renovar token de autenticação: " + refreshError)
                 }
             } else {
-                console.log("Refresh token ausente");
+                return Promise.reject("Usuário ou senha incorreto.")
             }
         }
         return Promise.reject(error);

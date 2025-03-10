@@ -1,6 +1,7 @@
-import { BrowserRouter, Route, Routes as ReactRoutes } from 'react-router-dom';
+import { HashRouter, Route, Routes as ReactRoutes } from 'react-router-dom';
 import { Home } from './pages/Home';
 import Permissao from './pages/Permissao';
+import Contato from './pages/Contatos';
 import Users  from './pages/Users';
 import  {Dispositivos} from './pages/Dispositivos';
 import  CadastroDispositivo from './pages/CadastroDispositivo';
@@ -9,6 +10,7 @@ import Login from './pages/Login';
 import { Navigate } from 'react-router-dom';
 import api from './services/api';
 import { useEffect, useState } from 'react';
+
 
 // Defina a interface para os props
 //interface IconeProps {
@@ -27,7 +29,7 @@ function ProtectedRoute({ children, roles }: { children: JSX.Element, roles : st
             try{
             // CONTINUAR AQUI - CRIAR METODO PARA BUSCAR ROLES DO USUARIO LOGADO
             let id_logado = localStorage.getItem("userId");
-            //console.log("---id logado: " + id_logado)
+
             //SE NÃO ESTIVER LOGADO, PARA
             if(!id_logado){
                 setLoading(false);
@@ -84,7 +86,6 @@ function ProtectedRoute({ children, roles }: { children: JSX.Element, roles : st
     }
    
 
-    //console.log("---permisao2? " + permissions)
     //return children
     return permissions ? children : <Navigate to="/login" />;
 }
@@ -92,7 +93,7 @@ function ProtectedRoute({ children, roles }: { children: JSX.Element, roles : st
 export const Routes = () => {
   
     return (
-        <BrowserRouter>
+        <HashRouter>
             <ReactRoutes>
                 <Route path="/login" element={ <Login /> } />
                 
@@ -102,11 +103,11 @@ export const Routes = () => {
                     </ProtectedRoute> }
                 />
                 <Route path="/rasc" element={
-                    <ProtectedRoute roles='ROLE_ADMIN,ROLE_MANAGER,ROLE_USER' >
+                    <ProtectedRoute roles='ROLE_ADMIN' >
                         <Rasc />
                     </ProtectedRoute> }
                 />
-                <Route path='/dispositivo' element={ 
+                <Route path='/dispositivos' element={ 
                     <ProtectedRoute roles='ROLE_ADMIN,ROLE_MANAGER,ROLE_USER'>
                         <Dispositivos />
                     </ProtectedRoute>} 
@@ -121,11 +122,16 @@ export const Routes = () => {
                         <Users />
                     </ProtectedRoute>
                 }/>
+                <Route path='/contatos' element={ 
+                   
+                        <Contato />
+                    
+                }/>
                 <Route path='/permissao' element={                
                         <Permissao />
                 } />
             </ReactRoutes>
-        </BrowserRouter>
+        </HashRouter>
     )
 }
 

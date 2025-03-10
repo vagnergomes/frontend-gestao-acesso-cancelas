@@ -4,5 +4,9 @@ export type Dispositivo = {
     local?: string;
     ip?: string;
     UDPport?: string;
-    ativo?: boolean
+    ativo?: boolean;
+    TCPport?: string;
+    protocolo?: string;
+    tipo?: string;
+    
 }

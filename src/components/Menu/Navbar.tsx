@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { FaBars, FaBell, FaUser } from 'react-icons/fa6'
 import { MdDarkMode } from 'react-icons/md';
 import { Theme } from '../../hooks/Theme';
@@ -17,17 +18,33 @@ import { useNavigate } from 'react-router-dom';
         const { theme, setTheme} = Theme();
 
         const navigate = useNavigate();
+
+
+        const [userName, setUserName] = useState("");
+
+        useEffect(() => {
+            const storedName = localStorage.getItem("userName");
+            if (storedName) {
+            setUserName(storedName);
+            }
+        }, []);
+
+
         function handleLogout() {
             localStorage.removeItem("authToken");
             localStorage.removeItem("userId");
+            localStorage.removeItem("userName");
+            localStorage.removeItem("userRoles");
             navigate('/login');
+            // Recarrega a página
+            window.location.reload();
         }
 
         return (
         <div>
             
             <nav className='bg-light dark:bg-dark border-b-2 dark:border-b-2 dark:border-gray-700 dark:border-opacity-35 px-4 py-3 flex fixed w-full z-50 justify-between '>
-                <img className={`${sidebarVisivel ? 'flex mt-1 m-1 w-29 h-7' : 'flex m-1 w-29 h-7'} text-white font-semibold `} src={sidebarVisivel ? './src/imgs/logo.png' : './src/imgs/logo_mini.png'}  alt="" />
+                <img className={`${sidebarVisivel ? 'flex mt-1 m-1 w-29 h-7' : 'flex m-1 w-29 h-7'} text-white font-semibold `} src={sidebarVisivel ? '/imgs/logo.png' : '/imgs/logo_mini.png'}  alt="" />
                 <div className='flex-grow ml-8 mt-2 text-xl'>
                     <FaBars className={`text-gray-800 dark:text-white me-4 cursor-pointer `}  onClick={ () => setSidebarVisivel(!sidebarVisivel) }/>
                     <span className='text-gray-800 dark:text-white font-semibold'></span>
@@ -52,7 +69,7 @@ import { useNavigate } from 'react-router-dom';
                             <FaUser className='w-6 h-6 mt-1' />
                             <div className='z-10 hidden absolute bg-white rounded-lg shadow w-32 group-focus:block top-full right-0'>
                                 
-                                <p className='bg-gray-100 '>Vagner Gomes</p>
+                                <p className='bg-gray-100 '>{userName}</p>
                                 <ul className='py-2 text-sm text-gray-950'>
                                     <li><a className='hover:bg-gray-100'  href="">Profile</a></li>
                                     <li><a className='hover:bg-gray-100' href="">Setting</a></li>

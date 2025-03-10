@@ -13,6 +13,9 @@ export default function CadastroDispositivo() {
   const localRef = useRef<HTMLInputElement | null>(null); //cadastrar
   const ipRef = useRef<HTMLInputElement | null>(null); //cadastrar
   const UDPportRef = useRef<HTMLInputElement | null>(null); //cadastrar
+  const TCPportRef = useRef<HTMLInputElement | null>(null); //cadastrar
+  const protocoloRef = useRef<HTMLSelectElement | null>(null); //cadastrar
+  const tipoRef = useRef<HTMLSelectElement | null>(null); //cadastrar
   const ativoRef = useRef<HTMLInputElement | null>(null); //cadastrar
 
   const [dispId, setDispId] = useState<any>(null);
@@ -20,6 +23,9 @@ export default function CadastroDispositivo() {
   const [dispLocal, setDispLocal] = useState<any>('');
   const [dispIp, setDispIp] = useState<any>('');
   const [dispUDPport, setDispUDPport] = useState<any>('');
+  const [dispTCPport, setDispTCPport] = useState<any>('');
+  const [dispProtocolo, setDispProtocolo] = useState<any>('');
+  const [dispTipo, setDispTipo] = useState<any>('');
   const [dispAtivo, setDispAtivo] = useState<any>(false);
 
   const [dispEdit, setDispEdit] = useState<boolean>(false);
@@ -45,10 +51,10 @@ export default function CadastroDispositivo() {
   async function handleSubmit(event: FormEvent){
     event.preventDefault();
 
-    if(!nomeRef.current?.value || !localRef.current?.value || !ipRef.current?.value || !UDPportRef.current?.value) {
+    if(!nomeRef.current?.value || !localRef.current?.value || !ipRef.current?.value || !protocoloRef.current?.value || !tipoRef.current?.value || (!UDPportRef.current?.value || !TCPportRef.current?.value)) {
         setAlertVisible(true);
         setAlertType('info');
-        setAlertMensage(`É necessário preencher todos os campos.`); 
+        setAlertMensage(`Preencha todos os campos necessários.`); 
         return
     };
     try{
@@ -59,6 +65,9 @@ export default function CadastroDispositivo() {
           local: localRef.current?.value,
           ip: ipRef.current?.value,
           UDPport: UDPportRef.current?.value,
+          TCPport: TCPportRef.current?.value,
+          protocolo: protocoloRef.current?.value,
+          tipo: tipoRef.current?.value,
           ativo: ativoRef.current?.checked
         });
         setDispEdit(false); 
@@ -68,6 +77,9 @@ export default function CadastroDispositivo() {
           local: localRef.current?.value,
           ip: ipRef.current?.value,
           UDPport: UDPportRef.current?.value,
+          TCPport: TCPportRef.current?.value,
+          protocolo: protocoloRef.current?.value,
+          tipo: tipoRef.current?.value,
           ativo: ativoRef.current?.checked
         });
         setAlertVisible(true);
@@ -87,6 +99,9 @@ export default function CadastroDispositivo() {
         setDispLocal('' );
         setDispIp('');
         setDispUDPport('');
+        setDispTCPport('');
+        setDispProtocolo('');
+        setDispTipo('');
         setDispAtivo(false);
     } catch (error){
         setAlertVisible(true);
@@ -125,6 +140,9 @@ export default function CadastroDispositivo() {
       setDispLocal(disp?.local );
       setDispIp(disp?.ip );
       setDispUDPport(disp?.UDPport);
+      setDispTCPport(disp?.TCPport);
+      setDispProtocolo(disp?.protocolo);
+      setDispTipo(disp?.tipo);
       setDispAtivo(disp?.ativo);
 
       setDispEdit(true);
@@ -192,6 +210,40 @@ export default function CadastroDispositivo() {
                   value={dispUDPport} //atualiza campo ao editar
                   onChange={(event) => setDispUDPport(event.target.value)} //permite alteração no campo ao editar
                   />
+              
+              <label className="font-medium text-black dark:text-white" >Porta TCP: </label>
+              <input type="text"
+                  placeholder="Digite a porta UDP."
+                  className="w-full mb-5 p-2 rounded"
+                  ref={TCPportRef}
+                  value={dispTCPport} //atualiza campo ao editar
+                  onChange={(event) => setDispTCPport(event.target.value)} //permite alteração no campo ao editar
+                  />
+
+            <label className="font-medium text-black dark:text-white">Protocolo principal: </label>
+            <select
+                className="w-full mb-5 p-2 rounded bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                ref={protocoloRef}
+                value={dispProtocolo} // Atualiza o campo ao editar
+                onChange={(event) => setDispProtocolo(event.target.value)} // Permite alteração no campo ao editar
+            >
+                <option value="">Selecione um protocolo</option>
+                <option value="TCP">TCP</option>
+                <option value="UDP">UDP</option>
+            </select>
+
+            <label className="font-medium text-black dark:text-white">Tipo de Dispositivo: </label>
+            <select
+                className="w-full mb-5 p-2 rounded bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                ref={tipoRef}
+                value={dispTipo} // Atualiza o campo ao editar
+                onChange={(event) => setDispTipo(event.target.value)} // Permite alteração no campo ao editar
+            >
+                <option value="">Selecione um protocolo</option>
+                <option value="CANCELA">CANCELA</option>
+                <option value="CATRACA">CATRACA</option>
+            </select>
+
 
             <label className="flex items-center font-medium mb-5 text-black dark:text-white">
               Ativo:
@@ -222,10 +274,14 @@ export default function CadastroDispositivo() {
             <thead>
               <tr className="bg-gray-200 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-200 uppercase tracking-wide">
                 <th className="px-4 py-2">ID</th>
+                <th className="px-4 py-2">TIPO</th>
                 <th className="px-4 py-2">Dispositivo</th>
                 <th className="px-4 py-2">Local</th>
                 <th className="px-4 py-2">IP</th>
                 <th className="px-4 py-2">Porta UDP</th>
+                <th className="px-4 py-2">Porta TCP</th>
+                <th className="px-4 py-2">Protocolo</th>
+                <th className="px-4 py-2"></th>
                 <th className="px-4 py-2 text-center">Ações</th>
               </tr>
             </thead>
@@ -236,10 +292,15 @@ export default function CadastroDispositivo() {
                   className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   <td className="px-4 py-3">{item.id}</td>
+                  <td className="px-4 py-2">{item.tipo}</td>
                   <td className="px-4 py-3">{item.nome}</td>
                   <td className="px-4 py-3">{item.local}</td>
                   <td className="px-4 py-3">{item.ip}</td>
                   <td className="px-4 py-3">{item.UDPport}</td>
+                  <td className="px-4 py-3">{item.TCPport}</td>
+                  <td className="px-4 py-3">{item.protocolo}</td>
+                  <td className="px-4 py-3">{item.ativo ? 'Ativo':'Inativo'}</td>
+                  
                   <td className="px-4 py-3 text-center flex justify-center gap-2">
                     <Button 
                       variant="danger" 

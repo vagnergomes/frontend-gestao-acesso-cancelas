@@ -198,7 +198,6 @@ export default function Users() {
       }));
     
       setRolesWithChecked(updatedRoles)
-      console.log("----roles do usuario:" + userRoles)
 
       setUserEdit(true);
   }

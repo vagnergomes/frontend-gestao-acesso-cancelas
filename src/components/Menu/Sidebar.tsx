@@ -1,5 +1,5 @@
-import { FaUsers, FaChevronDown, FaChevronRight, FaHome, FaCog, FaRegEnvelope, FaBug } from "react-icons/fa";
-import {  TbDeviceSpeaker   } from "react-icons/tb"
+import { FaUsers, FaChevronDown, FaChevronRight, FaHome, FaCog, FaBug } from "react-icons/fa";
+import { TbDeviceSpeaker   } from "react-icons/tb"
 import { Link, useLocation } from 'react-router-dom'
 import { usePath } from "../../hooks/usePath";
 import { useState, useEffect  } from "react";
@@ -19,7 +19,7 @@ export default function Sidebar(props: IconeProps) {
 
      // Checa se a rota atual é parte do submenu
     useEffect(() => {
-        const submenuRoutes = ['/dispositivo', '/cadastro-dispositivo'];
+        const submenuRoutes = ['/dispositivos', '/cadastro-dispositivo'];
         if (submenuRoutes.includes(location.pathname)) {
         setSubmenuVisivel(true);
         } else {
@@ -37,6 +37,7 @@ export default function Sidebar(props: IconeProps) {
 
             const roles = user_roles_data.map((r: any) => r.nome);
             setPermissions(roles);  // Atualiza as permissões do usuário
+            localStorage.setItem("userRoles", roles);
         }
 
         loadRoles();
@@ -50,7 +51,7 @@ export default function Sidebar(props: IconeProps) {
     const current = 'font-extrabold bg-gray-100 dark:text-gray-500'
     const { isCurrentPage} = usePath(); //pega pagina atual usando o hoohks usePath
 
-    <img className={`${sidebarVisivel ? 'flex' : 'hidden'} text-white font-semibold -mt-11 ml-10 w-29 h-7 `} src="./src/imgs/logo_mini.png" alt="" />
+    <img className={`${sidebarVisivel ? 'flex' : 'hidden'} text-white font-semibold -mt-11 ml-10 w-29 h-7 `} src="/imgs/logo_mini.png" alt="" />
 
     return (
         <div className="flex relative">
@@ -80,7 +81,7 @@ export default function Sidebar(props: IconeProps) {
 
                     {(() => {
                     // Divide a string de roles em um array                    
-                    const requiredRoles = 'ROLE_ADMIN,ROLE_MANAGER,ROLE_USER'.split(',');
+                    const requiredRoles = 'ROLE_ADMIN'.split(',');
                                 
                     // Verifica se o usuário tem pelo menos uma das permissões requeridas
                     const hasPermission = requiredRoles.some((role) => permissions.includes(role.trim()));
@@ -112,7 +113,7 @@ export default function Sidebar(props: IconeProps) {
                                 onClick={toggleSubmenu}
                                 className={`${
                                 sidebarVisivel ? 'flex' : 'hidden'
-                                } ${isCurrentPage('/dispositivo') || isCurrentPage('/cadastro-dispositivo') ? current : general} rounded hover:text-gray-500 hover:bg-gray-100 
+                                } ${isCurrentPage('/dispositivos') || isCurrentPage('/cadastro-dispositivo') ? current : general} rounded hover:text-gray-500 hover:bg-gray-100 
                                 w-48 m-2 p-3 justify-between items-center`}
                             >
                                 <div className="flex items-center">
@@ -142,11 +143,12 @@ export default function Sidebar(props: IconeProps) {
                                 // Renderiza o item apenas uma vez, se o usuário tiver permissão
                                 return hasPermission && (
                                         <li>
-                                            <Link to="/dispositivo"  className={`${sidebarVisivel ? 'flex' : 'hidden'} ${isCurrentPage('/dispositivo') ? current : general} rounded hover:text-gray-500 hover:bg-gray-100 
+                                            <Link to="/dispositivos"  className={`${sidebarVisivel ? 'flex' : 'hidden'} ${isCurrentPage('/dispositivos') ? current : general} rounded hover:text-gray-500 hover:bg-gray-100 
                                             w-40 m-2 p-3 justify-start`}>
                                                 Dispositivos
                                             </Link>
                                         </li>
+                                        
                                 );
                                 })()}
 
@@ -208,6 +210,26 @@ export default function Sidebar(props: IconeProps) {
                         w-48 m-2 p-3 justify-start`}>
                             <FaCog className="inline-block w-6 h-6 mr-2 " />
                             <a className='w-60' href="#">Settings</a>
+                        </li>
+                    );
+                    })()}
+
+
+                    {(() => {
+                    // Divide a string de roles em um array                    
+                    const requiredRoles = 'ROLE_ADMIN'.split(',');
+                                
+                    // Verifica se o usuário tem pelo menos uma das permissões requeridas
+                    const hasPermission = requiredRoles.some((role) => permissions.includes(role.trim()));
+
+                    // Renderiza o item apenas uma, se o usuário tiver permissão
+                    return hasPermission && (
+                        <li >
+                            <Link to="/contatos" className={`${sidebarVisivel ? 'flex' : 'hidden'} ${isCurrentPage('/contatos') ? current : general} rounded hover:text-gray-500 hover:bg-gray-100 
+                            w-48 m-2 p-3 justify-start`}>
+                                <FaUsers className="inline-block w-6 h-6 mr-2 " />
+                                Contatos
+                            </Link>
                         </li>
                     );
                     })()}

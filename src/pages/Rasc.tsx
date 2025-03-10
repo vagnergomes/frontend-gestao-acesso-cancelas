@@ -33,10 +33,9 @@ export const Rasc = () => {
                 //setAlertType('success');
                 //setAlertMensage(`Resposta da placa: ${mensagem}`);
             }else{
-                const mensagem = response.data.message; // Mensagem da resposta UDP
+                //const mensagem = response.data.message; // Mensagem da resposta UDP
                 setResposta(response.data.erro)
-                console.log(response.status);
-                console.log(mensagem)
+
                 //setAlertVisible(true);
                 //setAlertType('success');
                 //setAlertMensage(`Resposta da placa: ${mensagem}`);

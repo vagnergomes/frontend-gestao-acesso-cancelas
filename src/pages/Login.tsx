@@ -52,6 +52,9 @@ export default function Login() {
         
         const decoded = jwtDecode<CustomJwtPayload>(result.data.token);
         localStorage.setItem("userId", decoded.id_usuario);
+        
+        const username = emailRef.current?.value.split("@")[0];
+        localStorage.setItem("userName", username ?? "");
 
          //limpar referencia ao cadastrar
         emailRef.current.value = '';
@@ -72,7 +75,7 @@ export default function Login() {
         } else if (error.request) {
             errorMessage = "Não foi possível conectar ao servidor. Verifique sua conexão.";
         } else {
-            errorMessage = `Erro inesperado: ${error.message}`;
+            errorMessage = `${error}`;
         }
         setAlertVisible(true);
         setAlertType('error');
@@ -105,9 +108,11 @@ export default function Login() {
     )}
 
   <main className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md mt-40 ">
-    <h1 className="text-2xl font-semibold text-gray-700 text-center mb-6">
-      Bem-vindo
-    </h1>
+    <div className="flex justify-center mb-6">
+          <img src="/imgs/logo_mini.png" alt="Logo" className="w-16 h-16 object-contain" />
+    </div>
+
+  
     <form onSubmit={handleLogin} className="flex flex-col gap-4">
       <label className="font-medium text-gray-600" htmlFor="email">
         E-mail
@@ -141,7 +146,7 @@ export default function Login() {
         { isSubmitting ? 'Enviando':'Entrar' }
       </button>
     </form>
-
+    {/*
     <div className="mt-6 text-center">
       <p className="text-sm text-gray-500">
         Ainda não tem uma conta?{' '}
@@ -152,7 +157,8 @@ export default function Login() {
           Cadastre-se
         </a>
       </p>
-    </div>
+      
+    </div>*/}
   </main>
 </div>
 
