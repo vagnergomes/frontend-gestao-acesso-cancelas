@@ -7,7 +7,7 @@ export default function Header() {
     const [sidebarVisivel, setSidebarVisivel] = useState(true);
 
     function checkWidth() {
-        if (window.innerWidth < 1024) {
+        if (window.innerWidth < 1550) {
           setSidebarVisivel(false);
         } else {
           setSidebarVisivel(true);

@@ -10,7 +10,7 @@ export const Dispositivos = () => {
     const [alertMensage, setAlertMensage] = useState<string>('');
     const [alertType, setAlertType] = useState<string>('');
 
-    const [respostas, setRespostas] = useState<{ messag: string; nome:string, local: string, ip: string, porta_udp: string }[]>([]);
+    const [respostas, setRespostas] = useState<{ messag: string; nome:string, local: string, ip: string, porta_udp: string, porta_tcp: string, protocolo: string, tipo: string }[]>([]);
 
     const [dispositivos, setDispositivos] = useState<Dispositivo[]>([]); //listar
 
@@ -20,8 +20,8 @@ export const Dispositivos = () => {
     // Usando os dois últimos caracteres na condição
     //const isVisible = status_cancela === '75' ? '' : 'hidden';
 
-    async function handlerEnviaUDP(comando: string, nome: string , local: string, ip: string, porta_udp: string): 
-                                                Promise<{messag: string, nome:string, local: string, ip:string, porta_udp:string}> {
+    async function handlerEnviaUDP(comando: string, nome: string , local: string, ip: string, porta_udp: string, porta_tcp: string, protocolo: string, tipo: string): 
+                                                Promise<{messag: string, nome:string, local: string, ip:string, porta_udp:string, porta_tcp: string, protocolo: string, tipo: string}> {
         try {
             // Faz a requisição POST para a API e aguarda a resposta
             const response = await api.post(`/udp/envia`, {
@@ -29,20 +29,23 @@ export const Dispositivos = () => {
                 nome: nome,
                 local: local,
                 ip: ip,
-                porta_udp: porta_udp 
+                porta_udp: porta_udp,
+                porta_tcp: porta_tcp,
+                protocolo: protocolo,
+                tipo: tipo 
             });
             
 
             // Se a resposta for sucesso (status 200)
             if (response.status === 200) {
                 const mensagem = response.data.message; // Mensagem da resposta UDP
-                return {messag: mensagem, nome: response.data.nome, local: response.data.local, ip: response.data.ip, porta_udp: response.data.porta_udp};
+                return {messag: mensagem, nome: response.data.nome, local: response.data.local, ip: response.data.ip, porta_udp: response.data.porta_udp, porta_tcp: response.data.porta_tcp, protocolo: response.data.protocolo, tipo: response.data.tipo};
             }
-            if(response.status === 408 ){
+            if(response.status === 408){
                 const mensagem = response.data.message; // Mensagem da resposta UDP
-                return {messag: mensagem, nome: response.data.nome, local: response.data.local, ip: response.data.ip, porta_udp: response.data.porta_udp};
+                return {messag: mensagem, nome: response.data.nome, local: response.data.local, ip: response.data.ip, porta_udp: response.data.porta_udp, porta_tcp: response.data.porta_tcp, protocolo: response.data.protocolo, tipo: response.data.tipo};
             }else{
-                return {messag: response.data.erro, nome: response.data.nome, local: response.data.local, ip: response.data.ip, porta_udp: response.data.porta_udp};
+                return {messag: response.data.erro, nome: response.data.nome, local: response.data.local, ip: response.data.ip, porta_udp: response.data.porta_udp, porta_tcp: response.data.porta_tcp, protocolo: response.data.protocolo, tipo: response.data.tipo};
             }
             
         } catch (error: any) {
@@ -55,20 +58,20 @@ export const Dispositivos = () => {
                     setAlertVisible(true);
                     setAlertType('error');
                     setAlertMensage(apiMessage);
-                    return {messag: apiMessage, nome: nome, local: local, ip: ip, porta_udp: porta_udp};
+                    return {messag: apiMessage, nome: nome, local: local, ip: ip, porta_udp: porta_udp, porta_tcp: porta_tcp, protocolo: protocolo, tipo: tipo};
                 } else {
                     // Exibe outras mensagens de erro da API
                     setAlertVisible(true);
                     setAlertType('error');
                     setAlertMensage(`Erro: ${apiMessage}`);
-                    return {messag: apiMessage, nome: nome, local: local, ip: ip, porta_udp: porta_udp};
+                    return {messag: apiMessage, nome: nome, local: local, ip: ip, porta_udp: porta_udp, porta_tcp: porta_tcp, protocolo: protocolo, tipo: tipo};
                 }
             } else {
                 // Se o erro não veio da API (problema de rede, por exemplo)
                 setAlertVisible(true);
                 setAlertType('error');
                 setAlertMensage('Erro ao enviar o comando - Tente mais tarde ou entre em contato com o Administrador.');
-                return {messag: "Erro ao enviar o comando - Tente mais tarde ou entre em contato com o Administrador.", nome: nome, local: local, ip: ip, porta_udp: porta_udp}
+                return {messag: "Erro ao enviar o comando - Tente mais tarde ou entre em contato com o Administrador.", nome: nome, local: local, ip: ip, porta_udp: porta_udp, porta_tcp: porta_tcp, protocolo: protocolo, tipo: tipo}
             }
         }
     }
@@ -92,7 +95,10 @@ export const Dispositivos = () => {
                     const strLocal = String(cancela.local);
                     const strIp = String(cancela.ip).trim();
                     const strUDPport = String(cancela.UDPport).trim();
-                    return await handlerEnviaUDP('55AA0200', strNome, strLocal, strIp, strUDPport);
+                    const strTCPport = String(cancela.TCPport).trim();
+                    const strProtocolo = String(cancela.protocolo).trim();
+                    const strTipo = String(cancela.tipo).trim();
+                    return await handlerEnviaUDP('55AA0200', strNome, strLocal, strIp, strUDPport, strTCPport, strProtocolo, strTipo);
                 })
             ); 
 
@@ -113,10 +119,7 @@ export const Dispositivos = () => {
                 if( dispositivos.length === 0){
                 const response = await api.get("/dispositivo");
                 //const dispositivosAtivos = response.data.filter((dispositivo: any) => dispositivo.ativo === 1);
-                setDispositivos(response.data[0].filter((dispAtivos: any) =>   dispAtivos.ativo === 1)); // Atualiza o estado com o primeiro dispositivo
-
-                
-                    
+                setDispositivos(response.data[0].filter((dispAtivos: any) =>   dispAtivos.ativo === 1)); // Atualiza o estado com o primeiro dispositivo  
                 }
 
                 // Configura o intervalo somente se houver dispositivos
@@ -167,7 +170,8 @@ export const Dispositivos = () => {
                             <div className="mt-4 text-gray-800 dark:text-white" >{ resposta.nome }</div>
 
                             {/* Representação da cancela */}
-                            <div className="flex items-center mt-10 ml-4">
+                            <div className={resposta.tipo === 'CANCELA' ? 'visible' : 'invisible'}>
+                            <div  className="flex items-center mt-10 ml-4">
                                 <div className={`relative w-8 h-20 bg-gray-400 rounded-sm rounded-tr-2xl }`}>
                                     {/*aqui tenho que ficar consultando a api para atuliazar em tela o status da cancela*/}
                                     <div className={`absolute left-4 -top-8 w-2 h-16 bg-orange-500 -rotate-0 rounded-r ${resposta.messag.slice(-2) == '75' || resposta.messag.slice(-2) == '7f' || resposta.messag.slice(-2) == '7d' ? '' : 'hidden'}`}></div>
@@ -186,20 +190,49 @@ export const Dispositivos = () => {
                             <div className="flex items-center justify-between w-full mt-4">
                                 <input type="submit" 
                                             value={`${resposta.messag.slice(-2) == '75' || resposta.messag.slice(-2) == '7f' || resposta.messag.slice(-2) == '7d' ? 'Fechar' : 'Abrir'}`}
-                                            onClick={() => handlerEnviaUDP('55AA0306060000000101', resposta.nome, resposta.local ,resposta.ip,resposta.porta_udp)}
+                                            onClick={() => handlerEnviaUDP('55AA0306060000000101', resposta.nome, resposta.local ,resposta.ip,resposta.porta_udp,resposta.porta_tcp,resposta.protocolo,resposta.tipo)}
                                             className="cursor-pointer w-full p-2 bg-green-500 text-gray-700 rounded font-bold" />
                             </div>
 
                             <div className="mt-4">
                                 <h2 className="text-lg font-semibold text-black dark:text-white">Status</h2>
                                 <p className="text-black dark:text-white">{resposta.messag.substring(0,4) == '55aa' ? 'OK':'ERRO'}</p>
-                                <p className="text-black dark:text-white">{resposta.messag}</p>
                             </div>
+                        </div>
                      
                         {/* fim do card cancela */}
-                        </div>
-                        ))}
 
+                        {/* Representação da cancela */}
+                        <div className={resposta.tipo === 'CATRACA' ? 'visible' : 'invisible'}>
+                            <div className="flex items-center mt- ml-4">
+                                <div className={`relative w-8 h-20 bg-gray-400 rounded-sm rounded-tr-2xl }`}>
+                                    {/*aqui tenho que ficar consultando a api para atuliazar em tela o status da cancela*/}
+                                    <div className="absolute left-4 -top-8 w-2 h-16 bg-orange-500 -rotate-0 rounded-r"></div>
+                                    <div className="absolute left-11 top-0 w-2 h-16 bg-orange-500 -rotate-90 rounded-l"></div>
+                                    
+                                </div>
+                                <div className="w-36 h-1/6 mt-14 ml-1   flex items-center justify-center ">
+                                    <div className={`w-40 h-1/3 bg-green-500 ${resposta.messag.slice(-2) == '7e' || resposta.messag.slice(-2) == '7f' || resposta.messag.slice(-2) == '7d' ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                                    {/*<div className={`w-6 h-2 bg-red-500 ${true ? '' : 'hidden'}`}></div> */}
+                                    <span className="absolute text-black text-xs font-bold dark:text-gray-300  ">X</span>
+                                </div>
+                             
+                            </div>
+                             {/* botao cancela */}
+                             <div className="flex items-center justify-between w-full mt-4">
+                                <input type="submit" 
+                                            value="Liberar"
+                                            onClick={() => handlerEnviaUDP('55AA0306060000000101', resposta.nome, resposta.local ,resposta.ip,resposta.porta_udp,resposta.porta_tcp,resposta.protocolo,resposta.tipo)}
+                                            className="cursor-pointer w-full p-2 bg-green-500 text-gray-700 rounded font-bold" />
+                            </div>
+                        </div>
+                        
+                        </div>
+                        
+
+                        
+
+                        ))}
                     </div>
                      ) : (
                         <p className="text-gray-800 dark:text-white">Nenhum dispositivo encontrado.</p>

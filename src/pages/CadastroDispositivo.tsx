@@ -13,6 +13,9 @@ export default function CadastroDispositivo() {
   const localRef = useRef<HTMLInputElement | null>(null); //cadastrar
   const ipRef = useRef<HTMLInputElement | null>(null); //cadastrar
   const UDPportRef = useRef<HTMLInputElement | null>(null); //cadastrar
+  const TCPportRef = useRef<HTMLInputElement | null>(null); //cadastrar
+  const ProtocoloRef = useRef<HTMLSelectElement | null>(null); //cadastrar
+  const TipoRef = useRef<HTMLSelectElement | null>(null); //cadastrar
   const ativoRef = useRef<HTMLInputElement | null>(null); //cadastrar
 
   const [dispId, setDispId] = useState<any>(null);
@@ -20,6 +23,9 @@ export default function CadastroDispositivo() {
   const [dispLocal, setDispLocal] = useState<any>('');
   const [dispIp, setDispIp] = useState<any>('');
   const [dispUDPport, setDispUDPport] = useState<any>('');
+  const [dispTCPport, setDispTCPport] = useState<any>('');
+  const [dispProtocolo, setDispProtocolo] = useState<any>('');
+  const [dispTipo, setDispTipo] = useState<any>('');
   const [dispAtivo, setDispAtivo] = useState<any>(false);
 
   const [dispEdit, setDispEdit] = useState<boolean>(false);
@@ -45,10 +51,10 @@ export default function CadastroDispositivo() {
   async function handleSubmit(event: FormEvent){
     event.preventDefault();
 
-    if(!nomeRef.current?.value || !localRef.current?.value || !ipRef.current?.value || !UDPportRef.current?.value) {
+    if(!nomeRef.current?.value || !localRef.current?.value || !ipRef.current?.value || !UDPportRef.current?.value || !TCPportRef.current?.value || !ProtocoloRef.current?.value || !TipoRef.current?.value) {
         setAlertVisible(true);
         setAlertType('info');
-        setAlertMensage(`É necessário preencher todos os campos.`); 
+        setAlertMensage(`É necessário preencher todos os campos.`+ProtocoloRef.current?.value +TipoRef.current?.value); 
         return
     };
     try{
@@ -57,8 +63,11 @@ export default function CadastroDispositivo() {
         await api.put(`/dispositivo/${dispId}`, {
           nome: nomeRef.current?.value,
           local: localRef.current?.value,
-          ip: ipRef.current?.value,
-          UDPport: UDPportRef.current?.value,
+          ip: ipRef.current?.value.trim(),
+          UDPport: UDPportRef.current?.value.trim(),
+          TCPport: TCPportRef.current?.value.trim(),
+          protocolo: ProtocoloRef.current?.value.trim(),
+          tipo: TipoRef.current?.value.trim(),
           ativo: ativoRef.current?.checked
         });
         setDispEdit(false); 
@@ -66,8 +75,11 @@ export default function CadastroDispositivo() {
         await api.post("/dispositivo", {
           nome: nomeRef.current?.value,
           local: localRef.current?.value,
-          ip: ipRef.current?.value,
-          UDPport: UDPportRef.current?.value,
+          ip: ipRef.current?.value.trim(),
+          UDPport: UDPportRef.current?.value.trim(),
+          TCPport: TCPportRef.current?.value.trim(),
+          protocolo: ProtocoloRef.current?.value.trim(),
+          tipo: TipoRef.current?.value.trim(),
           ativo: ativoRef.current?.checked
         });
         setAlertVisible(true);
@@ -81,12 +93,18 @@ export default function CadastroDispositivo() {
         localRef.current.value = '';
         ipRef.current.value = '';
         UDPportRef.current.value = '';
+        TCPportRef.current.value = '';
+        ProtocoloRef.current.value = '';
+        TipoRef.current.value = '';
 
         //limpa campos usados no Update
         setDispNome('');
         setDispLocal('' );
         setDispIp('');
         setDispUDPport('');
+        setDispTCPport('');
+        setDispProtocolo('');
+        setDispTipo('');
         setDispAtivo(false);
     } catch (error){
         setAlertVisible(true);
@@ -107,7 +125,18 @@ export default function CadastroDispositivo() {
       setDispositivos(allDisp);
       setAlertVisible(true);
       setAlertType('success');
-      setAlertMensage('Sucesso ao remover.'); 
+      setAlertMensage('Sucesso ao remover.');
+
+       //limpa campos usados no Update
+       setDispNome('');
+       setDispLocal('' );
+       setDispIp('');
+       setDispUDPport('');
+       setDispTCPport('');
+       setDispProtocolo('');
+       setDispTipo('');
+       setDispAtivo(false);
+
       //setUsers(users.filter(user => user.id !== userId));
     } catch (error) {
       setAlertVisible(true);
@@ -124,7 +153,10 @@ export default function CadastroDispositivo() {
       setDispNome(disp?.nome?.trim());
       setDispLocal(disp?.local );
       setDispIp(disp?.ip );
-      setDispUDPport(disp?.UDPport);
+      setDispUDPport(disp?.UDPport?.trim());
+      setDispTCPport(disp?.TCPport?.trim());
+      setDispProtocolo(disp?.protocolo);
+      setDispTipo(disp?.tipo);
       setDispAtivo(disp?.ativo);
 
       setDispEdit(true);
@@ -151,63 +183,132 @@ export default function CadastroDispositivo() {
       />
       )}
 
-      <main className=" mt-28 w-full bg-slate-100 dark:bg-slate-900 md:max-w-2xl">
+      <main className=" mt-28 w-full bg-slate-100 dark:bg-slate-900 md:max-w-6xl">
   
         <h1 className="text-4xl font-medium text-black dark:text-white ">Dispositivos</h1>
 
-        <form className="flex flex-col my-5" onSubmit={handleSubmit}>
-          <label className="font-medium text-black dark:text-white" >Nome:</label>
-          <input type="text"
-                  placeholder="Digite seu nome."
-                  className="w-full mb-5 p-2 rounded" 
-                  ref={nomeRef}
-                  value={dispNome} //atualiza campo ao editar
-                  onChange={(event) => setDispNome(event.target.value)} //permite alteração no campo ao editar
-                  />
+        <form className="flex flex-col my-5 bg-slate-200 dark:bg-slate-800  rounded  p-5" onSubmit={handleSubmit}>
 
-
-          <label className="font-medium text-black dark:text-white" >Local: </label>
-          <input type="text"
-                  placeholder="Digite o local."
-                  className="w-full mb-5 p-2 rounded"
-                  ref={localRef}
-                  value={dispLocal} //atualiza campo ao editar
-                  onChange={(event) => setDispLocal(event.target.value)} //permite alteração no campo ao editar
-                  />
-          
-          <label className="font-medium text-black dark:text-white" >IP: </label>
-          <input type="text"
-                  placeholder="Digite o IP."
-                  className="w-full mb-5 p-2 rounded"
-                  ref={ipRef}
-                  value={dispIp} //atualiza campo ao editar
-                  onChange={(event) => setDispIp(event.target.value)} //permite alteração no campo ao editar
-                  />
-
-            <label className="font-medium text-black dark:text-white" >Porta UDP: </label>
-            <input type="text"
-                  placeholder="Digite a porta UDP."
-                  className="w-full mb-5 p-2 rounded"
-                  ref={UDPportRef}
-                  value={dispUDPport} //atualiza campo ao editar
-                  onChange={(event) => setDispUDPport(event.target.value)} //permite alteração no campo ao editar
-                  />
-
-            <label className="flex items-center font-medium mb-5 text-black dark:text-white">
-              Ativo:
+          {/* Nome, Local, IP, Porta UDP, Porta TCP */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5">
+            <div className="flex flex-col mb-5">
+              <label className="font-medium text-black dark:text-white">Nome:</label>
               <input
-                type="checkbox"
-                className="ml-2"
-                ref={ativoRef}
-                checked={dispAtivo}
-                onChange={(event) => setDispAtivo(event.target.checked)}
+                type="text"
+                placeholder="Digite o nome do dispositivo."
+                className="p-1 rounded bg-white dark:bg-gray-900 dark:text-gray-100"
+                ref={nomeRef}
+                value={dispNome}
+                onChange={(e) => setDispNome(e.target.value)}
               />
-            </label>
+            </div>
 
-          <input type="submit" 
-                  value="Cadastrar"
-                  className="cursor-pointer w-full p-2  bg-green-500 rounded font-medium" />
+            <div className="flex flex-col mb-5">
+              <label className="font-medium text-black dark:text-white">Local:</label>
+              <input
+                type="text"
+                placeholder="Digite o local."
+                className="p-1 rounded bg-white dark:bg-gray-900 dark:text-gray-100"
+                ref={localRef}
+                value={dispLocal}
+                onChange={(e) => setDispLocal(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col mb-5">
+              <label className="font-medium text-black dark:text-white">IP:</label>
+              <input
+                type="text"
+                placeholder="Digite o IP."
+                className="p-1 rounded bg-white dark:bg-gray-900 dark:text-gray-100"
+                ref={ipRef}
+                value={dispIp}
+                onChange={(e) => setDispIp(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col mb-5">
+              <label className="font-medium text-black dark:text-white">Porta UDP:</label>
+              <input
+                type="text"
+                placeholder="Digite a porta UDP."
+                className="p-1 rounded bg-white dark:bg-gray-900 dark:text-gray-100"
+                ref={UDPportRef}
+                value={dispUDPport}
+                onChange={(e) => setDispUDPport(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col mb-5">
+              <label className="font-medium text-black dark:text-white">Porta TCP:</label>
+              <input
+                type="text"
+                placeholder="Digite a porta TCP."
+                className="p-1 rounded bg-white dark:bg-gray-900 dark:text-gray-100"
+                ref={TCPportRef}
+                value={dispTCPport}
+                onChange={(e) => setDispTCPport(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Protocolo, Tipo, Ativo */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
+            <div className="flex flex-col mb-5">
+              <label className="font-medium text-black dark:text-white">Protocolo principal:</label>
+              <select
+                className="p-1  rounded bg-white dark:bg-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600"
+                value={dispProtocolo}
+                ref={ProtocoloRef}
+                onChange={(e) => setDispProtocolo(e.target.value)}
+              >
+                <option value="">Selecione um protocolo</option>
+                <option value="TCP">TCP</option>
+                <option value="UDP">UDP</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col mb-5">
+              <label className="font-medium text-black dark:text-white">Tipo de dispositivo:</label>
+              <select
+                className="p-1 m rounded bg-white dark:bg-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600"
+                value={dispTipo}
+                ref={TipoRef}
+                onChange={(e) => setDispTipo(e.target.value)}
+              >
+                <option value="">Selecione um tipo</option>
+                <option value="BALANCA">BALANÇA</option>
+                <option value="CANCELA">CANCELA</option>
+                <option value="CATRACA">CATRACA</option>
+                <option value="LEITORRFID">LEITOR RFID</option>
+              </select>
+            </div>
+
+            <div className="flex items-end mb-5">
+              <label className="flex items-center font-medium text-black dark:text-white">
+                Ativo:
+                <input
+                  type="checkbox"
+                  className="ml-2"
+                  ref={ativoRef}
+                  checked={dispAtivo}
+                  onChange={(e) => setDispAtivo(e.target.checked)}
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* Botão */}
+          <div className="flex flex-col md:flex-row md:gap-5">
+            <input
+              type="submit"
+              value="Cadastrar"
+              className="cursor-pointer w-32 p-2 bg-green-500 rounded font-medium"
+            />
+          </div>
         </form>
+
+
 
         <section>
           <h1 className='text-black dark:text-white'>Dados da API</h1>
@@ -226,6 +327,10 @@ export default function CadastroDispositivo() {
                 <th className="px-4 py-2">Local</th>
                 <th className="px-4 py-2">IP</th>
                 <th className="px-4 py-2">Porta UDP</th>
+                <th className="px-4 py-2">Porta TCP</th>
+                <th className="px-4 py-2">Protocolo</th>
+                <th className="px-4 py-2">Tipo</th>
+                <th className="px-4 py-2">Status</th>
                 <th className="px-4 py-2 text-center">Ações</th>
               </tr>
             </thead>
@@ -240,6 +345,10 @@ export default function CadastroDispositivo() {
                   <td className="px-4 py-3">{item.local}</td>
                   <td className="px-4 py-3">{item.ip}</td>
                   <td className="px-4 py-3">{item.UDPport}</td>
+                  <td className="px-4 py-3">{item.TCPport}</td>
+                  <td className="px-4 py-3">{item.protocolo}</td>
+                  <td className="px-4 py-3">{item.tipo}</td>
+                  <td className="px-4 py-3">{item.ativo? 'ATIVO':'INATIVO'}</td>
                   <td className="px-4 py-3 text-center flex justify-center gap-2">
                     <Button 
                       variant="danger" 
