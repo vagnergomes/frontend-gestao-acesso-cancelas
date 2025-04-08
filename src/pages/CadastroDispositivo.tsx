@@ -5,6 +5,7 @@ import { Table, Button } from 'react-bootstrap'
 import { Dispositivo }  from '../types/Dispositivo'
 import Alert from '../components/Alert'
 import Header from '../components/Menu/Header'
+import { Tipo_Dispositivo } from '../types/Tipo_Dispositivo'
 
 export default function CadastroDispositivo() {
 
@@ -33,13 +34,19 @@ export default function CadastroDispositivo() {
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
   const [alertMensage, setAlertMensage] = useState<string>('');
   const [alertType, setAlertType] = useState<string>('');
+
+  const [tiposDisp, setTiposDisp] = useState<Tipo_Dispositivo[]>([]);
  
   useEffect(() => {
     loadDispositivos();
+    
   }, []);
 
   async function loadDispositivos(){
-   
+    setTiposDisp([])
+    const tipos = await api.get("/dispositivo/tipo");
+    setTiposDisp(tipos.data[0]);
+
     const response = await api.get("/dispositivo");
     setDispositivos(response.data[0]);
  
@@ -277,11 +284,12 @@ export default function CadastroDispositivo() {
                 onChange={(e) => setDispTipo(e.target.value)}
               >
                 <option value="">Selecione um tipo</option>
-                <option value="BALANCA">BALANÇA</option>
-                <option value="CANCELA">CANCELA</option>
-                <option value="CATRACA">CATRACA</option>
-                <option value="LEITORRFID">LEITOR RFID</option>
-              </select>
+                {tiposDisp.filter((item) => item.tipo?.trim().toUpperCase() !== 'TODOS').map((item, index) => (
+                  <option key={index} value={item.tipo}>
+                    {item.tipo}
+                  </option>
+                ))}
+            </select>
             </div>
 
             <div className="flex items-end mb-5">

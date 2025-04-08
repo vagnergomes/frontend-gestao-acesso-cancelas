@@ -3,6 +3,7 @@ import api from "../services/api";
 import Alert from '../components/Alert';
 import { useEffect, useState} from 'react';
 import { Dispositivo }  from '../types/Dispositivo'
+import {  Tipo_Dispositivo }  from '../types/Tipo_Dispositivo'
 
 export const Dispositivos = () => {
     
@@ -13,6 +14,14 @@ export const Dispositivos = () => {
     const [respostas, setRespostas] = useState<{ messag: string; nome:string, local: string, ip: string, porta_udp: string, porta_tcp: string, protocolo: string, tipo: string }[]>([]);
 
     const [dispositivos, setDispositivos] = useState<Dispositivo[]>([]); //listar
+
+    const [tiposDisp, setTiposDisp] = useState<Tipo_Dispositivo[]>([]);
+
+    // filtro selecao de dispositivos mostrados
+    const [filtroTipo, setFiltroTipo] = useState<string>('TODOS');
+    const respostasFiltradas = filtroTipo === 'TODOS'
+    ? respostas
+    : respostas.filter(resposta => resposta.tipo === filtroTipo);
 
     // Pegando os dois últimos caracteres  75 = aberto / 76 = fechado
     //const status_cancela = resposta.slice(-2);
@@ -102,6 +111,7 @@ export const Dispositivos = () => {
                 })
             ); 
 
+            
 
             setRespostas([...resultados]);
            // console.log("resultados: " + resultados);
@@ -116,10 +126,14 @@ export const Dispositivos = () => {
     useEffect(() => {
         const iniciar = async () => {
             try{
+                setTiposDisp([])
+                const tipos = await api.get("/dispositivo/tipo");
+                setTiposDisp(tipos.data[0]);
+
                 if( dispositivos.length === 0){
-                const response = await api.get("/dispositivo");
-                //const dispositivosAtivos = response.data.filter((dispositivo: any) => dispositivo.ativo === 1);
-                setDispositivos(response.data[0].filter((dispAtivos: any) =>   dispAtivos.ativo === 1)); // Atualiza o estado com o primeiro dispositivo  
+                    const response = await api.get("/dispositivo");
+                    //const dispositivosAtivos = response.data.filter((dispositivo: any) => dispositivo.ativo === 1);
+                    setDispositivos(response.data[0].filter((dispAtivos: any) =>   dispAtivos.ativo === 1)); // Atualiza o estado com o primeiro dispositivo  
                 }
 
                 // Configura o intervalo somente se houver dispositivos
@@ -141,6 +155,10 @@ export const Dispositivos = () => {
     const handleCloseAlert = () => {
         setAlertVisible(false);
     };
+
+    const handleFiltro = (tipo: string) => {
+        setFiltroTipo(tipo);
+    };
     
   
     return (
@@ -158,12 +176,30 @@ export const Dispositivos = () => {
             
             <main className='mt-32 w-full bg-slate-100 dark:bg-slate-900 '>
                 <section className="pl-16 lg:pl-64">
+                    <div className="flex justify-start space-x-4 mb-6">
+                    {tiposDisp.map((tipo, index) => (
+                        
+                        <div key={index} >
+   
+                            <button
+                        className={`px-4 py-2 rounded-lg ${filtroTipo === tipo?.tipo  ? 'bg-green-500 text-white' : 'bg-gray-300'}`}
+                        onClick={() => handleFiltro(''+tipo.tipo )}
+                    >
+                        {(tipo?.tipo || '')}
+                    </button>
+                        </div>
+                    ))}
+                       
+                        
+                    </div>
+
 
                     {respostas.length > 0 && dispositivos && dispositivos.length > 0 ? (
+                        
                     
                     <div className="flex flex-wrap gap-4 w-full ">
                         {/* inicio do card cancela */}
-                        {respostas.map((resposta, index) => (
+                        {respostasFiltradas.map((resposta, index) => (
                         
                         <div key={index} className="flex flex-col items-start w-60 h-68 p-4 rounded-lg bg-light dark:bg-dark shadow-md border dark:border-gray-700 ">
                             <div className={`w-3 h-3 bg-green-400 rounded-full ml-48 ${resposta.messag.substring(0,4) == '55aa' ? 'bg-green-400':'bg-red-400 animate-pulse'}`}></div>
@@ -241,23 +277,35 @@ export const Dispositivos = () => {
                         )}
 
                         {/* Representação do Leitor RFID */}
-                        {resposta.tipo === 'LEITORRFID' &&(
-                        <div>
+                        {resposta.tipo === 'PAINEL LED' &&(
+                        <div >
                             <div className="flex items-center mt-10 ml-0">
                                 {/*aqui tenho que ficar consultando a api para atuliazar em tela o status da cancela*/}
-                                <div className="w-48 h-28 bg-gray-900 rounded-2xl shadow-lg p-4 flex flex-col items-center justify-between text-white relative">
-                                    <div className="w-44 h-20 bg-neutral-800 rounded-xl shadow-md flex flex-col items-center justify-center text-white relative">
-                                        <div className="w-16 h-16 border-2 border-gray-500 rounded-full flex items-center justify-center">
-                                            <div className="w-10 h-10 border-2 border-gray-500 rounded-full flex items-center justify-center">
-                                                    <div className="w-4 h-4 border-2 border-gray-500 rounded-full"></div>
+                                <div className="w-52 h-12 bg-gray-900 dark:bg-gray-700 rounded p-3  shadow-inner">
+                                    <div className="text-right  text-red-500 tracking-widest "> {resposta.messag} </div>
+                                </div>
+                            </div>
+                        </div>
+                         )}
+
+                        {/* Representação do Leitor RFID */}
+                        {resposta.tipo === 'LEITOR RFID' &&(
+                        <div>
+                            <div className="flex items-center mt-10 ml-8">
+                                {/*aqui tenho que ficar consultando a api para atuliazar em tela o status da cancela*/}
+                                <div className="w-36 h-18 bg-gray-900 rounded shadow-lg p-2 flex flex-col items-center justify-between text-white relative">
+                                    <div className="w-32 h-14 bg-gray-800 rounded-xl shadow-md flex flex-col items-center justify-center text-white relative">
+                                        <div className="w-12 h-12 border-2 border-gray-600 rounded-full flex items-center justify-center">
+                                            <div className="w-8 h-8 border-2 border-gray-600 rounded-full flex items-center justify-center">
+                                                    <div className="w-4 h-4 border-2 border-gray-600 rounded-full"></div>
                                             </div>
                                         </div>              
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        )}
-                        
+                         )}
+
                         </div>
 
 
