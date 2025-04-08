@@ -11,11 +11,14 @@ export const Dispositivos = () => {
     const [alertMensage, setAlertMensage] = useState<string>('');
     const [alertType, setAlertType] = useState<string>('');
 
-    const [respostas, setRespostas] = useState<{ messag: string; nome:string, local: string, ip: string, porta_udp: string, porta_tcp: string, protocolo: string, tipo: string }[]>([]);
+    const [respostas, setRespostas] = useState<{ messag: string; nome:string, local: string, ip: string, porta_udp: string, porta_tcp: string, protocolo: string, tipo: string}[]>([]);
 
     const [dispositivos, setDispositivos] = useState<Dispositivo[]>([]); //listar
 
     const [tiposDisp, setTiposDisp] = useState<Tipo_Dispositivo[]>([]);
+
+    const [pingResults, setPingResults] = useState<Record<string, { alive: boolean; time: string | null }>>({});
+
 
     // filtro selecao de dispositivos mostrados
     const [filtroTipo, setFiltroTipo] = useState<string>('TODOS');
@@ -29,12 +32,12 @@ export const Dispositivos = () => {
     // Usando os dois últimos caracteres na condição
     //const isVisible = status_cancela === '75' ? '' : 'hidden';
 
-    async function handlerEnviaUDP(comando: string, nome: string , local: string, ip: string, porta_udp: string, porta_tcp: string, protocolo: string, tipo: string): 
+    async function handlerEnviaComando(tipo_solicitacao: string, nome: string , local: string, ip: string, porta_udp: string, porta_tcp: string, protocolo: string, tipo: string): 
                                                 Promise<{messag: string, nome:string, local: string, ip:string, porta_udp:string, porta_tcp: string, protocolo: string, tipo: string}> {
         try {
             // Faz a requisição POST para a API e aguarda a resposta
             const response = await api.post(`/udp/envia`, {
-                comandoHex: comando,
+                tipo_solicitacao: tipo_solicitacao,
                 nome: nome,
                 local: local,
                 ip: ip,
@@ -79,8 +82,8 @@ export const Dispositivos = () => {
                 // Se o erro não veio da API (problema de rede, por exemplo)
                 setAlertVisible(true);
                 setAlertType('error');
-                setAlertMensage('Erro ao enviar o comando - Tente mais tarde ou entre em contato com o Administrador.');
-                return {messag: "Erro ao enviar o comando - Tente mais tarde ou entre em contato com o Administrador.", nome: nome, local: local, ip: ip, porta_udp: porta_udp, porta_tcp: porta_tcp, protocolo: protocolo, tipo: tipo}
+                setAlertMensage('Erro ao enviar o comando - Tente mais tarde ou entre em contato com o Administrador.'+  nome +":"+ ip);
+                return {messag: "Erro ao enviar o comando: ", nome: nome, local: local, ip: ip, porta_udp: porta_udp, porta_tcp: porta_tcp, protocolo: protocolo, tipo: tipo}
             }
         }
     }
@@ -90,10 +93,10 @@ export const Dispositivos = () => {
         //55AA0200
         /*
         const resultados = await Promise.all([
-        await handlerEnviaUDP('55AA0200', 'Cancela 01', 'Portaria', '10.2.1.107', '2002'),
-        await handlerEnviaUDP('55AA0200', 'Cancela 02', 'Portaria', '10.2.1.108', '2002'),
-        await handlerEnviaUDP('55AA0200', 'Cancela 03', 'Balanças', '10.2.1.100', '2002'),
-        await handlerEnviaUDP('55AA0200', 'Cancela 04', 'Balanças', '10.2.1.101', '2002')
+        await handlerEnviaComando('55AA0200', 'Cancela 01', 'Portaria', '10.2.1.107', '2002'),
+        await handlerEnviaComando('55AA0200', 'Cancela 02', 'Portaria', '10.2.1.108', '2002'),
+        await handlerEnviaComando('55AA0200', 'Cancela 03', 'Balanças', '10.2.1.100', '2002'),
+        await handlerEnviaComando('55AA0200', 'Cancela 04', 'Balanças', '10.2.1.101', '2002')
         ]);
         */
         try{
@@ -107,11 +110,9 @@ export const Dispositivos = () => {
                     const strTCPport = String(cancela.TCPport).trim();
                     const strProtocolo = String(cancela.protocolo).trim();
                     const strTipo = String(cancela.tipo).trim();
-                    return await handlerEnviaUDP('55AA0200', strNome, strLocal, strIp, strUDPport, strTCPport, strProtocolo, strTipo);
+                    return await handlerEnviaComando('SOLICITA', strNome, strLocal, strIp, strUDPport, strTCPport, strProtocolo, strTipo); //55AA0200
                 })
             ); 
-
-            
 
             setRespostas([...resultados]);
            // console.log("resultados: " + resultados);
@@ -122,14 +123,15 @@ export const Dispositivos = () => {
         } 
     };
 
+
     // useEffect para configurar a consulta automática a cada 5 segundos
     useEffect(() => {
         const iniciar = async () => {
             try{
-                setTiposDisp([])
+                if( tiposDisp.length === 0){
                 const tipos = await api.get("/dispositivo/tipo");
                 setTiposDisp(tipos.data[0]);
-
+                }
                 if( dispositivos.length === 0){
                     const response = await api.get("/dispositivo");
                     //const dispositivosAtivos = response.data.filter((dispositivo: any) => dispositivo.ativo === 1);
@@ -148,7 +150,36 @@ export const Dispositivos = () => {
                 setAlertMensage('Erro ao carregar dispositivos: ' + error);
             } 
         };
+
         iniciar(); // Chama a função assíncrona
+        let isMounted = true;
+
+        const fetchPing = async () => {
+            try {
+            const res = await api.get('/dispositivo/status');
+            // supondo que res.data seja um array: [{ ip, alive, time }, …]
+            const map: Record<string, any> = {};
+            res.data.forEach((item: any) => {
+                map[item.ip.trim()] = {
+                alive: item.alive,
+                time: item.time
+                };
+            });
+            if (isMounted) setPingResults(map);
+            } catch (err) {
+            console.error('Erro ao buscar ping:', err);
+            }
+        };
+
+            // busca imediata + agendamento
+            fetchPing();
+            const interval = setInterval(fetchPing, 5000);
+            return () => {
+                isMounted = false;
+                clearInterval(interval);
+            };
+
+        
     }, [dispositivos]); // Apenas uma vez na montagem
     
     
@@ -188,21 +219,18 @@ export const Dispositivos = () => {
                         {(tipo?.tipo || '')}
                     </button>
                         </div>
-                    ))}
-                       
-                        
+                    ))}                  
                     </div>
-
 
                     {respostas.length > 0 && dispositivos && dispositivos.length > 0 ? (
                         
-                    
                     <div className="flex flex-wrap gap-4 w-full ">
                         {/* inicio do card cancela */}
                         {respostasFiltradas.map((resposta, index) => (
                         
                         <div key={index} className="flex flex-col items-start w-60 h-68 p-4 rounded-lg bg-light dark:bg-dark shadow-md border dark:border-gray-700 ">
-                            <div className={`w-3 h-3 bg-green-400 rounded-full ml-48 ${resposta.messag.substring(0,4) == '55aa' ? 'bg-green-400':'bg-red-400 animate-pulse'}`}></div>
+                            <div className="mt-4 text-gray-800 dark:text-white" >{ pingResults[resposta.ip.trim()]?.alive }</div>
+                            <div className={`w-3 h-3 bg-green-400 rounded-full ml-48 ${pingResults[resposta.ip.trim()]?.alive ? 'bg-green-400':'bg-red-400 animate-pulse'}`}></div>
                             <div className="mt-4 text-gray-800 dark:text-white">{ resposta.tipo }</div>
                             <div className="w-full  text-gray-800 text-xl font-semibold dark:text-white">{ resposta.local } </div>
                             <div className="mt-4 text-gray-800 dark:text-white" >{ resposta.nome }</div>
@@ -226,7 +254,7 @@ export const Dispositivos = () => {
                                 <div className="flex items-center justify-between w-full mt-4">
                                     <input type="submit" 
                                                 value={`${resposta.messag.slice(-2) == '75' || resposta.messag.slice(-2) == '7f' || resposta.messag.slice(-2) == '7d' ? 'Fechar' : 'Abrir'}`}
-                                                onClick={() => handlerEnviaUDP('55AA0306060000000101', resposta.nome, resposta.local ,resposta.ip,resposta.porta_udp,resposta.porta_tcp,resposta.protocolo,resposta.tipo)}
+                                                onClick={() => handlerEnviaComando('ENVIA', resposta.nome, resposta.local ,resposta.ip,resposta.porta_udp,resposta.porta_tcp,resposta.protocolo,resposta.tipo)} //55AA0306060000000101
                                                 className="cursor-pointer w-full p-2 bg-green-500 text-gray-700 rounded font-bold" />
                                 </div>
                                 {/*
@@ -257,7 +285,7 @@ export const Dispositivos = () => {
                              <div className="flex items-center justify-between w-48 mt-4  ">
                                 <input type="submit" 
                                             value="Liberar"
-                                            onClick={() => handlerEnviaUDP('55AA0306060000000101', resposta.nome, resposta.local ,resposta.ip,resposta.porta_udp,resposta.porta_tcp,resposta.protocolo,resposta.tipo)}
+                                            onClick={() => handlerEnviaComando('ENVIA', resposta.nome, resposta.local ,resposta.ip,resposta.porta_udp,resposta.porta_tcp,resposta.protocolo,resposta.tipo)} //55AA0306060000000101
                                             className="cursor-pointer w-full p-2 bg-green-500 text-gray-700 rounded font-bold" />
                             </div>
                         </div>

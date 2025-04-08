@@ -7,5 +7,6 @@ export type Dispositivo = {
     TCPport?: string;
     protocolo?: string;
     tipo?: string;
-    ativo?: boolean
+    ativo?: boolean,
+    status?: boolean
 }

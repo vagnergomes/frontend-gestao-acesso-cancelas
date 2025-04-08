@@ -319,7 +319,7 @@ export default function CadastroDispositivo() {
 
 
         <section>
-          <h1 className='text-black dark:text-white'>Dados da API</h1>
+         
 
           <Table 
             striped 
@@ -329,7 +329,7 @@ export default function CadastroDispositivo() {
             className="table-auto w-full border-collapse text-sm text-gray-800 dark:text-gray-200"
           >
             <thead>
-              <tr className="bg-gray-200 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-200 uppercase tracking-wide">
+              <tr className="bg-slate-200 dark:bg-slate-800 text-left text-sm font-semibold text-gray-600 dark:text-gray-200 uppercase tracking-wide">
                 <th className="px-4 py-2">ID</th>
                 <th className="px-4 py-2">Dispositivo</th>
                 <th className="px-4 py-2">Local</th>
