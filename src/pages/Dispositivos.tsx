@@ -166,6 +166,7 @@ export const Dispositivos = () => {
                         {respostas.map((resposta, index) => (
                         
                         <div key={index} className="flex flex-col items-start w-60 h-68 p-4 rounded-lg bg-light dark:bg-dark shadow-md border dark:border-gray-700 ">
+                            <div className={`w-3 h-3 bg-green-400 rounded-full ml-48 ${resposta.messag.substring(0,4) == '55aa' ? 'bg-green-400':'bg-red-400 animate-pulse'}`}></div>
                             <div className="mt-4 text-gray-800 dark:text-white">{ resposta.tipo }</div>
                             <div className="w-full  text-gray-800 text-xl font-semibold dark:text-white">{ resposta.local } </div>
                             <div className="mt-4 text-gray-800 dark:text-white" >{ resposta.nome }</div>
@@ -173,14 +174,16 @@ export const Dispositivos = () => {
                             {/* Representação da cancela */}
                             {resposta.tipo === 'CANCELA' &&(
                             <div >
+                                
                                 <div className="flex items-center mt-10 ml-4">
                                     <div className="relative w-8 h-20 bg-gray-400 rounded-sm rounded-tr-2xl">
                                         <div className={`absolute left-4 -top-8 w-2 h-16 bg-orange-500 -rotate-0 rounded-r ${resposta.messag.slice(-2) == '75' || resposta.messag.slice(-2) == '7f' || resposta.messag.slice(-2) == '7d' ? '' : 'hidden'}`}></div>
                                         <div className={`absolute left-11 top-0 w-2 h-16 bg-orange-500 -rotate-90 rounded-l ${resposta.messag.slice(-2) == '76' || resposta.messag.slice(-2) == '7e' ? '' : 'hidden'}`}></div>
                                     </div>
-                                    <div className="w-36 h-1/6 mt-14 ml-1   flex items-center justify-center">
-                                        <div className={`w-36 h-1/3 bg-green-500 ${resposta.messag.slice(-2) == '7e' || resposta.messag.slice(-2) == '7f' || resposta.messag.slice(-2) == '7d' ? 'bg-red-500' : 'bg-green-500'}`}></div>
-                                        <span className="absolute text-black text-xs font-bold dark:text-gray-300  ">X</span>
+                                    <div className="w-36 h-1/3 mt-14 ml-2  flex items-center justify-center">
+                                    {/*<div className={`w-36 h-1/3 bg-green-500 ${resposta.messag.slice(-2) == '7e' || resposta.messag.slice(-2) == '7f' || resposta.messag.slice(-2) == '7d' ? 'bg-red-500' : 'bg-green-500'}`}></div>*/}
+                                        <span className={`w-36 h-[3px]  absolute text-black text-xs font-bold dark:text-gray-300 
+                                        flex items-center justify-center ${resposta.messag.slice(-2) == '7e' || resposta.messag.slice(-2) == '7f' || resposta.messag.slice(-2) == '7d' ? 'bg-red-500' : 'bg-green-500'}`}>X</span>
                                     </div>
                                 </div>
                                 {/* botao cancela */} 
@@ -190,11 +193,12 @@ export const Dispositivos = () => {
                                                 onClick={() => handlerEnviaUDP('55AA0306060000000101', resposta.nome, resposta.local ,resposta.ip,resposta.porta_udp,resposta.porta_tcp,resposta.protocolo,resposta.tipo)}
                                                 className="cursor-pointer w-full p-2 bg-green-500 text-gray-700 rounded font-bold" />
                                 </div>
+                                {/*
                                 <div className="mt-4">
                                     <h2 className="text-lg font-semibold text-black dark:text-white">Status</h2>
                                     <p className="text-black dark:text-white">{resposta.messag.substring(0,4) == '55aa' ? 'OK':'ERRO'}</p>
-                                    {/*<p className="text-black dark:text-white">{resposta.messag}</p>*/}
                                 </div>
+                                */}
                                                                 
                             </div>
                             )}
@@ -219,6 +223,37 @@ export const Dispositivos = () => {
                                             value="Liberar"
                                             onClick={() => handlerEnviaUDP('55AA0306060000000101', resposta.nome, resposta.local ,resposta.ip,resposta.porta_udp,resposta.porta_tcp,resposta.protocolo,resposta.tipo)}
                                             className="cursor-pointer w-full p-2 bg-green-500 text-gray-700 rounded font-bold" />
+                            </div>
+                        </div>
+                        )}
+
+                        {/* Representação da catracva */}
+                        {resposta.tipo === 'BALANCA' &&(
+                        <div >
+                            <div className="flex items-center mt-10 ml-0">
+                                {/*aqui tenho que ficar consultando a api para atuliazar em tela o status da cancela*/}
+                                <div className="w-52 h-12 bg-gray-900 dark:bg-gray-700 rounded p-2  shadow-inner">
+                                    <div className="text-right text-2xl text-green-200 tracking-widest "> {resposta.messag} </div>
+                                </div>
+                            </div>
+                        
+                        </div>
+                        )}
+
+                        {/* Representação do Leitor RFID */}
+                        {resposta.tipo === 'LEITORRFID' &&(
+                        <div>
+                            <div className="flex items-center mt-10 ml-0">
+                                {/*aqui tenho que ficar consultando a api para atuliazar em tela o status da cancela*/}
+                                <div className="w-48 h-28 bg-gray-900 rounded-2xl shadow-lg p-4 flex flex-col items-center justify-between text-white relative">
+                                    <div className="w-44 h-20 bg-neutral-800 rounded-xl shadow-md flex flex-col items-center justify-center text-white relative">
+                                        <div className="w-16 h-16 border-2 border-gray-500 rounded-full flex items-center justify-center">
+                                            <div className="w-10 h-10 border-2 border-gray-500 rounded-full flex items-center justify-center">
+                                                    <div className="w-4 h-4 border-2 border-gray-500 rounded-full"></div>
+                                            </div>
+                                        </div>              
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         )}
