@@ -15,9 +15,11 @@ export default function CadastroDispositivo() {
   const ipRef = useRef<HTMLInputElement | null>(null); //cadastrar
   const UDPportRef = useRef<HTMLInputElement | null>(null); //cadastrar
   const TCPportRef = useRef<HTMLInputElement | null>(null); //cadastrar
-  const ProtocoloRef = useRef<HTMLSelectElement | null>(null); //cadastrar
-  const TipoRef = useRef<HTMLSelectElement | null>(null); //cadastrar
+  const protocoloRef = useRef<HTMLSelectElement | null>(null); //cadastrar
+  const tipoRef = useRef<HTMLSelectElement | null>(null); //cadastrar
   const ativoRef = useRef<HTMLInputElement | null>(null); //cadastrar
+  const proxyRef = useRef<HTMLInputElement | null>(null); //cadastrar
+  const portaProxyRef = useRef<HTMLInputElement | null>(null); //cadastrar
 
   const [dispId, setDispId] = useState<any>(null);
   const [dispNome, setDispNome] = useState<any>('');
@@ -28,6 +30,8 @@ export default function CadastroDispositivo() {
   const [dispProtocolo, setDispProtocolo] = useState<any>('');
   const [dispTipo, setDispTipo] = useState<any>('');
   const [dispAtivo, setDispAtivo] = useState<any>(false);
+  const [dispProxy, setDispProxy] = useState<any>(false);
+  const [dispPortaProxy, setDispPortaProxy] = useState<any>('');
 
   const [dispEdit, setDispEdit] = useState<boolean>(false);
 
@@ -58,10 +62,10 @@ export default function CadastroDispositivo() {
   async function handleSubmit(event: FormEvent){
     event.preventDefault();
 
-    if(!nomeRef.current?.value || !localRef.current?.value || !ipRef.current?.value || !UDPportRef.current?.value || !TCPportRef.current?.value || !ProtocoloRef.current?.value || !TipoRef.current?.value) {
+    if(!nomeRef.current?.value || !localRef.current?.value || !ipRef.current?.value || !UDPportRef.current?.value || !TCPportRef.current?.value || !protocoloRef.current?.value || !tipoRef.current?.value) {
         setAlertVisible(true);
         setAlertType('info');
-        setAlertMensage(`É necessário preencher todos os campos.`+ProtocoloRef.current?.value +TipoRef.current?.value); 
+        setAlertMensage(`É necessário preencher todos os campos.`); 
         return
     };
     try{
@@ -73,9 +77,11 @@ export default function CadastroDispositivo() {
           ip: ipRef.current?.value.trim(),
           UDPport: UDPportRef.current?.value.trim(),
           TCPport: TCPportRef.current?.value.trim(),
-          protocolo: ProtocoloRef.current?.value.trim(),
-          tipo: TipoRef.current?.value.trim(),
-          ativo: ativoRef.current?.checked
+          protocolo: protocoloRef.current?.value.trim(),
+          tipo: tipoRef.current?.value.trim(),
+          ativo: ativoRef.current?.checked,
+          proxy: proxyRef.current?.checked,
+          porta_proxy: portaProxyRef.current?.value.trim()
         });
         setDispEdit(false); 
       }else {
@@ -85,9 +91,11 @@ export default function CadastroDispositivo() {
           ip: ipRef.current?.value.trim(),
           UDPport: UDPportRef.current?.value.trim(),
           TCPport: TCPportRef.current?.value.trim(),
-          protocolo: ProtocoloRef.current?.value.trim(),
-          tipo: TipoRef.current?.value.trim(),
-          ativo: ativoRef.current?.checked
+          protocolo: protocoloRef.current?.value.trim(),
+          tipo: tipoRef.current?.value.trim(),
+          ativo: ativoRef.current?.checked,
+          proxy: proxyRef.current?.checked,
+          porta_proxy: portaProxyRef.current?.value.trim()
         });
         setAlertVisible(true);
       };
@@ -101,8 +109,9 @@ export default function CadastroDispositivo() {
         ipRef.current.value = '';
         UDPportRef.current.value = '';
         TCPportRef.current.value = '';
-        ProtocoloRef.current.value = '';
-        TipoRef.current.value = '';
+        protocoloRef.current.value = '';
+        tipoRef.current.value = '';
+        //portaProxyRef.current.value  = '';
 
         //limpa campos usados no Update
         setDispNome('');
@@ -113,6 +122,8 @@ export default function CadastroDispositivo() {
         setDispProtocolo('');
         setDispTipo('');
         setDispAtivo(false);
+        setDispProxy(false);
+        setDispPortaProxy('');
     } catch (error){
         setAlertVisible(true);
         setAlertType('error');
@@ -164,6 +175,8 @@ export default function CadastroDispositivo() {
       setDispTCPport(disp?.TCPport?.trim());
       setDispProtocolo(disp?.protocolo);
       setDispTipo(disp?.tipo);
+      setDispProxy(disp?.proxy);
+      setDispPortaProxy(disp?.porta_proxy);
       setDispAtivo(disp?.ativo);
 
       setDispEdit(true);
@@ -266,7 +279,7 @@ export default function CadastroDispositivo() {
               <select
                 className="p-1  rounded bg-white dark:bg-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600"
                 value={dispProtocolo}
-                ref={ProtocoloRef}
+                ref={protocoloRef}
                 onChange={(e) => setDispProtocolo(e.target.value)}
               >
                 <option value="">Selecione um protocolo</option>
@@ -280,7 +293,7 @@ export default function CadastroDispositivo() {
               <select
                 className="p-1 m rounded bg-white dark:bg-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600"
                 value={dispTipo}
-                ref={TipoRef}
+                ref={tipoRef}
                 onChange={(e) => setDispTipo(e.target.value)}
               >
                 <option value="">Selecione um tipo</option>
@@ -290,6 +303,27 @@ export default function CadastroDispositivo() {
                   </option>
                 ))}
             </select>
+            </div>
+
+            <div className="flex flex-col mb-5">
+            <label className="flex items-center font-medium text-black dark:text-white">
+                Proxy
+                <input
+                  type="checkbox"
+                  className="ml-2"
+                  ref={proxyRef}
+                  checked={dispProxy}
+                  onChange={(e) => setDispProxy(e.target.checked)}
+                />
+              </label>
+              <input
+                type="text"
+                placeholder="Digite a porta proxy."
+                className="p-1 rounded bg-white dark:bg-gray-900 dark:text-gray-100"
+                ref={portaProxyRef}
+                value={dispPortaProxy}
+                onChange={(e) => setDispPortaProxy(e.target.value)}
+              />
             </div>
 
             <div className="flex items-end mb-5">
@@ -338,6 +372,8 @@ export default function CadastroDispositivo() {
                 <th className="px-4 py-2">Porta TCP</th>
                 <th className="px-4 py-2">Protocolo</th>
                 <th className="px-4 py-2">Tipo</th>
+                <th className="px-4 py-2">Proxy</th>
+                <th className="px-4 py-2">PortaProxy</th>
                 <th className="px-4 py-2">Status</th>
                 <th className="px-4 py-2 text-center">Ações</th>
               </tr>
@@ -356,6 +392,8 @@ export default function CadastroDispositivo() {
                   <td className="px-4 py-3">{item.TCPport}</td>
                   <td className="px-4 py-3">{item.protocolo}</td>
                   <td className="px-4 py-3">{item.tipo}</td>
+                  <td className="px-4 py-3">{item.proxy? 'SIM':'NÃO'}</td>
+                  <td className="px-4 py-3">{item.porta_proxy}</td>
                   <td className="px-4 py-3">{item.ativo? 'ATIVO':'INATIVO'}</td>
                   <td className="px-4 py-3 text-center flex justify-center gap-2">
                     <Button 

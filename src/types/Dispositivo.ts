@@ -8,5 +8,7 @@ export type Dispositivo = {
     protocolo?: string;
     tipo?: string;
     ativo?: boolean,
+    proxy?: boolean,
+    porta_proxy?: string,
     status?: boolean
 }

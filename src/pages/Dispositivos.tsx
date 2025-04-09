@@ -36,7 +36,7 @@ export const Dispositivos = () => {
                                                 Promise<{messag: string, nome:string, local: string, ip:string, porta_udp:string, porta_tcp: string, protocolo: string, tipo: string}> {
         try {
             // Faz a requisição POST para a API e aguarda a resposta
-            const response = await api.post(`/udp/envia`, {
+            const response = await api.post(`/dispositivo/envia`, {
                 tipo_solicitacao: tipo_solicitacao,
                 nome: nome,
                 local: local,
